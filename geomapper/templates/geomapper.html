@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-
-{% block title %}Mapa z rysowaniem{% endblock %}
-
 {% block content %}
+<style>
+    #map {width: 100%; height: 500px;}
+</style>
 <div class="map-container">
     <h2>Narysuj geometrię</h2>
     <p>Użyj narzędzi po lewej stronie, aby narysować punkt, linię lub poligon.</p>
@@ -17,11 +17,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicjalizacja mapy
     const map = L.map('map').setView([52.2297, 21.0122], 13);
 
-    // Warstwa bazowa CartoDB (jasna)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 20
+    // Warstwa bazowa OSM
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
     // Wymuszenie przeliczenia rozmiaru mapy po inicjalizacji
@@ -68,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Funkcja do wysyłania geometrii
     async function saveGeometry(geoJSON) {
         try {
-            const response = await fetch(''''{{ url_for('geomapper.save_geom') }}'''', {
+            const response = await fetch('{{ url_for('geomapper.save_geom') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

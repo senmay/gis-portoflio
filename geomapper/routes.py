@@ -1,11 +1,11 @@
 from flask import render_template, request, jsonify, current_app
-from geoalchemy2.shape import to_shape
+from shapely.geometry import shape
 from geoalchemy2 import WKTElement
 
 from . import geomapper_bp
 from app import db, DrawnGeometry
 
-@geomapper_bp.route('/draw')
+@geomapper_bp.route('/', endpoint='index')
 def draw():
     """Renderuje stronę do rysowania geometrii."""
     return render_template('geomapper.html')
@@ -17,11 +17,11 @@ def save_geom():
         return jsonify({'error': 'Invalid data'}), 400
 
     try:
-        # Konwersja GeoJSON (z Leaflet-draw) na obiekt Shapely
-        # Leaflet-draw używa formatu GeoJSON, więc musimy go odpowiednio sparsować
-        # Zakładamy, że geometria jest w EPSG:4326
-        shape = to_shape(data['geometry'])
-        wkt_element = WKTElement(shape.wkt, srid=4326)
+        # Konwersja GeoJSON na obiekt Shapely
+        geometry = shape(data['geometry'])
+        
+        # Utworzenie WKTElement do zapisu w PostGIS
+        wkt_element = WKTElement(geometry.wkt, srid=4326)
         
         new_geom = DrawnGeometry(geom=wkt_element)
         db.session.add(new_geom)
