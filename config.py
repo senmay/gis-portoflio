@@ -5,11 +5,15 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
 
 # --- DEBUGGING ---
-print("--- DEBUG: Wczytane zmienne środowiskowe dla e-mail ---")
-print(f"MAIL_USERNAME: {os.environ.get('MAIL_USERNAME')}")
-print(f"MAIL_PASSWORD: {os.environ.get('MAIL_PASSWORD')}")
-print(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
-print("----------------------------------------------------")
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+logging.debug("--- DEBUG: Wczytane zmienne środowiskowe dla e-mail ---")
+logging.debug(f"MAIL_USERNAME: {os.environ.get('MAIL_USERNAME')}")
+logging.debug(f"MAIL_PASSWORD: {os.environ.get('MAIL_PASSWORD')}")
+logging.debug(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
+logging.debug("----------------------------------------------------")
 # --- END DEBUGGING ---
 
 class Config:
