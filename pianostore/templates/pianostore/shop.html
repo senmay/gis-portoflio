@@ -102,7 +102,7 @@
     <div class="sheet-music-grid">
         {% for product in products %}
         <div class="product-card">
-            <img src="{{ url_for('pianostore.static', filename='img/' + product.cover_image_filename) }}" alt="Okładka {{ product.title }}">
+            <img src="{{ url_for('pianostore.static', filename='img/' + product.cover_image_filename) if product.cover_image_filename else url_for('pianostore.static', filename='img/placeholder_sheet_music.svg') }}" alt="Okładka {{ product.title }}">
             <div class="product-card-content">
                 <h3>{{ product.title }}</h3>
                 <p>{{ product.description }}</p>
