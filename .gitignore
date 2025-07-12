@@ -32,3 +32,5 @@ od2.txt
 odp.txt
 GEMINI.MD
 .env
+pianostore.db
+*.sqlite3
