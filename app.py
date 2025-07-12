@@ -3,11 +3,13 @@ import logging
 from logging.handlers import RotatingFileHandler
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
 from geoalchemy2 import Geometry
 
 from config import Config
 
 db = SQLAlchemy()
+mail = Mail()
 
 class DrawnGeometry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,6 +23,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     db.init_app(app)
+    mail.init_app(app)
 
     # Inicjalizacja dodatkowych elementów (np. folderu upload)
     config_class.init_app(app)
@@ -41,9 +44,15 @@ def create_app(config_class=Config):
     # --- Rejestracja komponentów (Blueprints) ---
     from geouploader import geouploader_bp
     from geomapper import geomapper_bp
+    from pianostore import pianostore_bp
+    from pianostore import email as pianostore_email
     
     app.register_blueprint(geouploader_bp, url_prefix='/geouploader')
     app.register_blueprint(geomapper_bp, url_prefix='/geomapper')
+    app.register_blueprint(pianostore_bp, url_prefix='/piano-store')
+
+    # Pass mail object to the email module
+    pianostore_email.mail = mail
 
     # --- Główna strona aplikacji (portfolio) ---
     @app.route('/')
@@ -60,6 +69,10 @@ def create_app(config_class=Config):
     def piano():
         """Renderuje stronę o mnie."""
         return render_template('piano.html')
+
+    # Register CLI commands
+    from pianostore import commands as pianostore_commands
+    pianostore_commands.init_app(app)
 
     with app.app_context():
         db.create_all()

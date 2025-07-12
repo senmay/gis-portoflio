@@ -1,7 +1,16 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.env'))
+
+# --- DEBUGGING ---
+print("--- DEBUG: Wczytane zmienne środowiskowe dla e-mail ---")
+print(f"MAIL_USERNAME: {os.environ.get('MAIL_USERNAME')}")
+print(f"MAIL_PASSWORD: {os.environ.get('MAIL_PASSWORD')}")
+print(f"MAIL_DEFAULT_SENDER: {os.environ.get('MAIL_DEFAULT_SENDER')}")
+print("----------------------------------------------------")
+# --- END DEBUGGING ---
 
 class Config:
     """Przechowuje konfigurację aplikacji."""
@@ -9,6 +18,20 @@ class Config:
     # Klucz do obsługi sesji i wiadomości flash
     SECRET_KEY = os.environ.get('SECRET_KEY', 'super_secret_key_for_flash_messages')
     
+    # Konfiguracja dla drugiej bazy danych (sklepu)
+    SQLALCHEMY_BINDS = {
+        'pianostore': os.environ.get('PIANOSTORE_DATABASE_URL') or
+                      'sqlite:///' + os.path.join(basedir, 'pianostore.db')
+    }
+
+    # Konfiguracja dla wysyłki e-maili
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+
     # Konfiguracja GeoServera
     GEOSERVER_URL = os.environ.get('GEOSERVER_URL', "http://localhost:8080/geoserver/rest")
     GEOSERVER_WORKSPACE = os.environ.get('GEOSERVER_WORKSPACE', "host_strona")
