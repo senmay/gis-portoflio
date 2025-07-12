@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
     """Przechowuje konfigurację aplikacji."""
@@ -11,6 +14,11 @@ class Config:
     GEOSERVER_WORKSPACE = os.environ.get('GEOSERVER_WORKSPACE', "host_strona")
     GEOSERVER_USER = os.environ.get("GEOSERVER_USER", "admin")
     GEOSERVER_PASSWORD = os.environ.get("GEOSERVER_PASSWORD", "geoserver")
+
+    # Konfiguracja bazy danych PostGIS
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'postgresql://postgres:password@localhost:5432/gisdb'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Konfiguracja ścieżek
     # Używamy os.path.abspath, aby zapewnić, że ścieżka jest zawsze poprawna

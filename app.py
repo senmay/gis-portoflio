@@ -1,9 +1,17 @@
 import os
 import logging
 from logging.handlers import RotatingFileHandler
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from geoalchemy2 import Geometry
 
 from config import Config
+
+db = SQLAlchemy()
+
+class DrawnGeometry(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    geom = db.Column(Geometry(geometry_type='GEOMETRY', srid=4326))
 
 def create_app(config_class=Config):
     """
@@ -11,6 +19,8 @@ def create_app(config_class=Config):
     """
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    db.init_app(app)
 
     # Inicjalizacja dodatkowych elementów (np. folderu upload)
     config_class.init_app(app)
@@ -28,10 +38,12 @@ def create_app(config_class=Config):
     app.logger.setLevel(logging.INFO)
     app.logger.info('Aplikacja portfolio została uruchomiona')
 
-    # --- Rejestracja komponentu (Blueprintu) ---
+    # --- Rejestracja komponentów (Blueprints) ---
     from geouploader import geouploader_bp
-    # Komponent będzie dostępny pod adresem /geouploader
+    from geomapper import geomapper_bp
+    
     app.register_blueprint(geouploader_bp, url_prefix='/geouploader')
+    app.register_blueprint(geomapper_bp, url_prefix='/geomapper')
 
     # --- Główna strona aplikacji (portfolio) ---
     @app.route('/')
@@ -48,5 +60,8 @@ def create_app(config_class=Config):
     def piano():
         """Renderuje stronę o mnie."""
         return render_template('piano.html')
+
+    with app.app_context():
+        db.create_all()
 
     return app

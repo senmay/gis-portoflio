@@ -283,6 +283,54 @@ footer {
 }
 
 
+
+/* --- Map & Draw Page --- */
+.map-container {
+    max-width: 1200px; /* Wider for map view */
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+#map {
+    height: 500px;
+    width: 100%;
+    border-radius: 5px;
+    margin-top: 1rem;
+    background-color: #333; /* Placeholder color */
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2a4b2a; /* Success color */
+    color: #a3d9a3;
+    padding: 1rem 1.5rem;
+    border-radius: 5px;
+    z-index: 1050; /* High z-index to appear on top */
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.5s linear;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    font-size: 1rem;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.toast.error {
+    background-color: #5a2a2a; /* Error color */
+    color: #e8a3a3;
+}
+
 /* --- Responsive Design --- */
 @media (max-width: 768px) {
     header {

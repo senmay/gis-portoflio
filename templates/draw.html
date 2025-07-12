@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Draw on Map | Portfolio{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<section id="draw-map">
+    <h2>Narysuj Geometrię</h2>
+    <div id="map"></div>
+    <div id="toast" class="toast"></div>
+</section>
+
+<style>
+    #map {
+        height: 600px;
+        background-color: #333;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--accent-color);
+        color: var(--background-color);
+        padding: 1rem 2rem;
+        border-radius: 5px;
+        font-weight: 600;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+    .toast.show {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var map = L.map('map').setView([52.2297, 21.0122], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        var drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems
+            },
+            draw: {
+                polygon: true,
+                polyline: true,
+                rectangle: false,
+                circle: false,
+                marker: true,
+                circlemarker: false
+            }
+        });
+        map.addControl(drawControl);
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+            var geojson = layer.toGeoJSON();
+
+            fetch('/api/save_geom', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(geojson),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    showToast(`Zapisano geometrię o ID: ${data.id}`);
+                    drawnItems.addLayer(layer);
+                } else {
+                    showToast('Błąd zapisu geometrii.', true);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showToast('Błąd serwera.', true);
+            });
+        });
+
+        function showToast(message, isError = false) {
+            var toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.backgroundColor = isError ? '#d9534f' : 'var(--accent-color)';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}
