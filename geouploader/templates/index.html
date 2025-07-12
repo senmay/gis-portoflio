@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wgraj GeoTIFF do GeoServera</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: #121212;
+            color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            font-weight: 300;
+            color: #FFD700;
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
+        form div {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #aaa;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #f4f4f4;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        input[type="file"]::-webkit-file-upload-button {
+            background: #FFD700;
+            color: #121212;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background-color: #ffeb80;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 1rem;
+            background-color: #FFD700;
+            color: #121212;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: #ffeb80;
+        }
+        .alert-success {
+            padding: 1rem;
+            background-color: #2a4b2a;
+            color: #a3d9a3;
+            border: 1px solid #3e6e3e;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .alert-danger {
+            padding: 1rem;
+            background-color: #5a2a2a;
+            color: #e8a3a3;
+            border: 1px solid #8e3e3e;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 2rem;
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .home-link:hover {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Publikowanie warstwy GeoTIFF</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('geouploader.upload_file') }}" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="layer_name">Nazwa warstwy w GeoServerze:</label>
+                <input type="text" id="layer_name" name="layer_name" required>
+            </div>
+            <div>
+                <label for="file">Wybierz plik GeoTIFF:</label>
+                <input type="file" id="file" name="file" accept=".tif,.tiff" required>
+            </div>
+            <button type="submit">Wgraj i publikuj</button>
+        </form>
+        
+        <a href="{{ url_for('home') }}" class="home-link">Powrót do strony głównej</a>
+    </div>
+</body>
+</html>

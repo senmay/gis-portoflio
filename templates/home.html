@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moje Portfolio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Witaj w moim portfolio!</h1>
+    <p>To jest główna strona mojej aplikacji.</p>
+    <p>Jeden z moich projektów, uploader GeoTIFF, jest dostępny tutaj:</p>
+    <a href="{{ url_for('geouploader.index') }}">Przejdź do GeoUploadera</a>
+</body>
+</html>
