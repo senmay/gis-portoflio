@@ -39,4 +39,14 @@ def create_app(config_class=Config):
         """Renderuje główną stronę portfolio."""
         return render_template('home.html')
 
+    @app.route('/projects')
+    def projects():
+        """Renderuje stronę z projektami."""
+        return render_template('projects.html')
+
+    @app.route('/piano')
+    def piano():
+        """Renderuje stronę o mnie."""
+        return render_template('piano.html')
+
     return app

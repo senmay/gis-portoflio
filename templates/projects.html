@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Projekty | Portfolio{% endblock %}
+
+{% block content %}
+<section id="projects">
+    <h2>Moje Projekty</h2>
+    <div class="project-grid">
+        <div class="project-card">
+            <div class="project-card-content">
+                <h3>GeoUploader & WMS Publisher</h3>
+                <p>Narzędzie do bezpośredniego uploadu plików GeoTIFF i ich automatycznej publikacji jako warstwy WMS w GeoServerze.</p>
+                <span class="project-tech-stack">PostGIS, GeoServer, Leaflet</span>
+                <a href="{{ url_for('geouploader.index') }}" class="btn-view">Zobacz</a>
+            </div>
+        </div>
+        <div class="project-card">
+            <div class="project-card-content">
+                <h3>TODO: Nazwa Projektu 2</h3>
+                <p>TODO: Krótki opis drugiego projektu (jedno zdanie).</p>
+                <span class="project-tech-stack">TODO: Technologie</span>
+                <a href="#" class="btn-view">Zobacz</a>
+            </div>
+        </div>
+        <div class="project-card">
+            <div class="project-card-content">
+                <h3>TODO: Nazwa Projektu 3</h3>
+                <p>TODO: Krótki opis trzeciego projektu (jedno zdanie).</p>
+                <span class="project-tech-stack">TODO: Technologie</span>
+                <a href="#" class="btn-view">Zobacz</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
