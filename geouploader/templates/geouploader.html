@@ -18,14 +18,32 @@
         <form action="{{ url_for('geouploader.upload_file') }}" method="post" enctype="multipart/form-data" class="uploader-form">
             <div>
                 <label for="layer_name">Nazwa warstwy w GeoServerze:</label>
-                <input type="text" id="layer_name" name="layer_name" required>
+                <input type="text" id="layer_name" name="layer_name" value="{{ layer_name if layer_name else '' }}" required>
             </div>
             <div>
                 <label for="file">Wybierz plik GeoTIFF:</label>
-                <input type="file" id="file" name="file" accept=".tif,.tiff" required>
+                <input type="file" id="file" name="file" accept=".tif,.tiff" {% if not show_epsg_input %}required{% endif %}>
+                {% if filename %}
+                    <p>Wybrany plik: {{ filename }}</p>
+                    <input type="hidden" name="original_filename" value="{{ filename }}">
+                {% endif %}
             </div>
+
+            {% if show_epsg_input %}
+            <div id="epsg-input-group">
+                <p class="alert alert-warning">Brak informacji o układzie współrzędnych (CRS) w pliku. Proszę podać kod EPSG:</p>
+                <label for="epsg_code">Kod EPSG (np. 4326, 3857):</label>
+                <input type="text" id="epsg_code" name="epsg_code" placeholder="np. 4326" required>
+            </div>
+            {% endif %}
+
             <button type="submit" class="btn-primary">Wgraj i publikuj</button>
         </form>
+
+        <div class="view-wms-container">
+            <p>Możesz też przejrzeć już istniejące warstwy:</p>
+            <a href="{{ url_for('geouploader.view_wms_layers') }}" class="btn-secondary">Przeglądaj warstwy WMS</a>
+        </div>
     </div>
 </section>
 {% endblock %}

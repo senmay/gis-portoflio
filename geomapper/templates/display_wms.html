@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Wyświetl WMS | Portfolio{% endblock %}
+
+{% block content %}
+<section id="display-wms">
+    <h2>Wyświetlanie warstw WMS</h2>
+
+    <div class="wms-display-container">
+        {% if layer_name %}
+            <p class="alert alert-success">Warstwa <strong>{{ layer_name }}</strong> została pomyślnie opublikowana.</p>
+        {% endif %}
+
+        <div id="wms-info-container" style="margin-bottom: 15px;">
+            <p>Link do usługi WMS (GetCapabilities):</p>
+            <pre><code>{{ wms_capabilities_url }}</code></pre>
+            <div id="selected-layer-wms-url-container" style="display: none;">
+                <p>Link do wybranej warstwy (GetMap):</p>
+                <pre><code id="selected-layer-wms-url"></code></pre>
+            </div>
+        </div>
+
+        <div id="map" style="height: 500px; width: 100%;"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-proj/1.0.0/leaflet-proj.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        proj4.defs("EPSG:3857", "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
+
+        const map = L.map('map').setView([52.2, 21.0], 6);
+
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        const baseLayers = { "OpenStreetMap": osmLayer };
+        const wmsLayers = {};
+        const availableLayers = {{ available_layers | tojson }};
+        const initialLayerName = '{{ layer_name }}';
+        let initialLayer = null;
+
+        availableLayers.forEach(layerName => {
+            const wmsLayer = L.tileLayer.wms('{{ wms_base_url }}', {
+                layers: '{{ wms_workspace }}' + ':' + layerName,
+                format: 'image/png',
+                transparent: true,
+                version: '1.1.0'
+            });
+            wmsLayers[layerName] = wmsLayer;
+            if (layerName === initialLayerName) {
+                initialLayer = wmsLayer;
+            }
+        });
+
+        const layersControl = L.control.layers(baseLayers, wmsLayers, { collapsed: false }).addTo(map);
+
+        if (initialLayer) {
+            initialLayer.addTo(map);
+        }
+
+        const OpacityControl = L.Control.extend({
+            onAdd: function(map) {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                container.style.backgroundColor = 'white';
+                container.style.padding = '5px';
+                const slider = L.DomUtil.create('input', '', container);
+                slider.type = 'range';
+                slider.min = 0; slider.max = 1; slider.step = 0.1; slider.value = 0.7;
+                slider.title = 'Przezroczystość warstw WMS';
+
+                L.DomEvent.on(slider, 'input', e => {
+                    const opacity = e.target.value;
+                    for (const layerName in wmsLayers) {
+                        if (map.hasLayer(wmsLayers[layerName])) {
+                            wmsLayers[layerName].setOpacity(opacity);
+                        }
+                    }
+                });
+                L.DomEvent.disableClickPropagation(container).disableScrollPropagation(container);
+                if (initialLayer) initialLayer.setOpacity(slider.value);
+                return container;
+            }
+        });
+        new OpacityControl({ position: 'topright' }).addTo(map);
+
+        function zoomToInitialLayer() {
+            const bbox_str = '{{ bbox_epsg3857 }}';
+            if (!bbox_str) return;
+
+            const bbox_coords = bbox_str.split(',').map(Number);
+            if (bbox_coords.every(isFinite) && bbox_coords.length === 4) {
+                const sw = proj4('EPSG:3857', 'EPSG:4326', [bbox_coords[0], bbox_coords[1]]);
+                const ne = proj4('EPSG:3857', 'EPSG:4326', [bbox_coords[2], bbox_coords[3]]);
+                map.fitBounds(L.latLngBounds([sw[1], sw[0]], [ne[1], ne[0]]));
+            } else {
+                console.error("Invalid bbox_epsg3857 coordinates:", bbox_str);
+            }
+        }
+
+        if ('{{ bbox_epsg3857 }}') {
+            zoomToInitialLayer();
+        }
+        
+        const wmsUrlContainer = document.getElementById('selected-layer-wms-url-container');
+        const wmsUrlEl = document.getElementById('selected-layer-wms-url');
+
+        function updateWmsUrlInfo(layerName) {
+            if (layerName) {
+                const getMapUrl = `{{ wms_base_url }}?service=WMS&version=1.1.0&request=GetMap&layers={{ wms_workspace }}:${layerName}`;
+                wmsUrlEl.textContent = getMapUrl;
+                wmsUrlContainer.style.display = 'block';
+            } else {
+                wmsUrlContainer.style.display = 'none';
+            }
+        }
+
+        map.on('overlayadd', function(e) {
+            updateWmsUrlInfo(e.name);
+        });
+
+        map.on('overlayremove', function(e) {
+            // Check if any other overlay is active
+            const activeOverlays = Object.keys(wmsLayers).filter(name => map.hasLayer(wmsLayers[name]));
+            if (activeOverlays.length > 0) {
+                updateWmsUrlInfo(activeOverlays[0]); // Show URL for the first active one
+            } else {
+                updateWmsUrlInfo(null); // Hide if no layers are active
+            }
+        });
+
+        // Initial check
+        if (initialLayerName) {
+            updateWmsUrlInfo(initialLayerName);
+        }
+
+        setTimeout(() => map.invalidateSize(), 100);
+    });
+</script>
+
+{% endblock %}
