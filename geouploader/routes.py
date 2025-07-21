@@ -186,7 +186,7 @@ def upload_file():
         bbox_epsg3857 = f"{minx_3857},{miny_3857},{maxx_3857},{maxy_3857}"
         logger.info(f"Converted bbox_epsg3857: {bbox_epsg3857}")
 
-        redirect_url = url_for('geouploader.display_wms', 
+        redirect_url = url_for('wms_viewer', 
                                  layer_name=layer_name, 
                                  bbox_epsg3857=bbox_epsg3857)
         logger.info(f"Redirecting to: {redirect_url}")

@@ -6,3 +6,5 @@ python-dotenv
 Shapely
 Flask-Mail
 pyproj
+rasterio
+requests

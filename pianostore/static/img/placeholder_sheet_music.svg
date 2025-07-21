@@ -1,8 +1,0 @@
-<svg width="200" height="280" viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="200" height="280" fill="#F0F0F0"/>
-<path d="M100 70C100 64.4772 95.5228 60 90 60C84.4772 60 80 64.4772 80 70V150C80 155.523 84.4772 160 90 160C95.5228 160 100 155.523 100 150V70Z" fill="#333333"/>
-<circle cx="90" cy="160" r="10" fill="#333333"/>
-<path d="M120 100C120 94.4772 115.523 90 110 90C104.477 90 100 94.4772 100 100V180C100 185.523 104.477 190 110 190C115.523 190 120 185.523 120 180V100Z" fill="#333333"/>
-<circle cx="110" cy="190" r="10" fill="#333333"/>
-<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="16" fill="#666666">Brak okładki</text>
-</svg>

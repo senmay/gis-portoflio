@@ -28,8 +28,9 @@
             <nav>
                 <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">Home</a>
                 <a href="{{ url_for('projects') }}" class="{{ 'active' if request.endpoint == 'projects' else '' }}">Projekty</a>
-                <a href="{{ url_for('geomapper.index') }}" class="{{ 'active' if request.endpoint == 'geomapper.index' else '' }}">Geomapper</a>
-                <a href="{{ url_for('piano') }}" class="{{ 'active' if request.endpoint == 'piano' else '' }}">Pianino</a>
+                <a href="{{ url_for('wms_viewer') }}" class="{{ 'active' if request.endpoint == 'wms_viewer' else '' }}">WMS Viewer</a>
+                
+                
             </nav>
         </header>
 

@@ -138,6 +138,12 @@ nav a.active {
     box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 
+.project-card-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Make it take all available space */
+}
+
 .project-card:hover {
     transform: translateY(-5px);
     border-color: var(--accent-color);
@@ -170,6 +176,7 @@ nav a.active {
     border-radius: 5px;
     text-align: center;
     transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: auto; /* Push the button to the bottom */
 }
 
 .btn-view:hover {

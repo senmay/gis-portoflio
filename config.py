@@ -10,11 +10,7 @@ class Config:
     # Klucz do obsługi sesji i wiadomości flash
     SECRET_KEY = os.environ.get('SECRET_KEY', 'super_secret_key_for_flash_messages')
     
-    # Konfiguracja dla drugiej bazy danych (sklepu)
-    SQLALCHEMY_BINDS = {
-        'pianostore': os.environ.get('PIANOSTORE_DATABASE_URL') or
-                      'sqlite:///' + os.path.join(basedir, 'pianostore.db')
-    }
+    
 
     # Konfiguracja dla wysyłki e-maili
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')

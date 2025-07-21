@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    /* Fixed map container to prevent jumping */
+    #map {
+        width: 100%;
+        height: 500px;
+        min-height: 500px;
+        max-height: 500px;
+        position: relative;
+        border-radius: 5px;
+        background-color: #333;
+    }
+
+    /* WMS Controls Panel */
+    .wms-controls {
+        background-color: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .control-group label {
+        color: var(--secondary-text-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .control-group select,
+    .control-group input[type="range"] {
+        padding: 0.5rem;
+        background-color: #2c2c2c;
+        border: 1px solid #444;
+        border-radius: 5px;
+        color: var(--primary-text-color);
+        font-size: 0.9rem;
+    }
+
+    .control-group select:focus,
+    .control-group input[type="range"]:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+
+    /* Tool buttons */
+    .tool-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .tool-btn {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        border: 1px solid var(--accent-color);
+        color: var(--accent-color);
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .tool-btn:hover,
+    .tool-btn.active {
+        background-color: var(--accent-color);
+        color: var(--background-color);
+    }
+
+    .tool-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Layer info */
+    .layer-info {
+        background-color: #2c2c2c;
+        border: 1px solid #444;
+        border-radius: 5px;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--secondary-text-color);
+    }
+
+    .layer-info.hidden {
+        display: none;
+    }
+
+    /* Opacity display */
+    .opacity-display {
+        font-size: 0.8rem;
+        color: var(--secondary-text-color);
+        margin-top: 0.25rem;
+    }
+
+    /* Measurement display */
+    .measurement-display {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(30, 30, 30, 0.9);
+        color: var(--primary-text-color);
+        padding: 0.5rem;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        z-index: 1000;
+        display: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .wms-controls {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .tool-buttons {
+            justify-content: center;
+        }
+
+        .tool-btn {
+            flex: 1;
+            min-width: 80px;
+        }
+    }
+</style>
+
+<div class="map-container">
+    <h2>WMS Layer Viewer</h2>
+    <p>Przeglądaj warstwy WMS z GeoServer, eksportuj współrzędne i korzystaj z narzędzi pomiarowych.</p>
+    <div style="margin-bottom: 1rem; text-align: center;">
+        <a href="{{ url_for('home') }}" class="btn-view">Powrót do Strony Głównej</a>
+    </div>
+
+    <!-- WMS Controls Panel -->
+    <div class="wms-controls">
+        <!-- Layer Selection -->
+        <div class="control-group">
+            <label for="layer-select">Wybierz warstwę WMS:</label>
+            <select id="layer-select">
+                <option value="">Ładowanie warstw...</option>
+            </select>
+            <div id="layer-info" class="layer-info hidden"></div>
+        </div>
+
+        <!-- Layer Opacity -->
+        <div class="control-group">
+            <label for="opacity-slider">Przezroczystość warstwy:</label>
+            <input type="range" id="opacity-slider" min="0" max="100" value="100" disabled>
+            <div class="opacity-display">Przezroczystość: <span id="opacity-value">100</span>%</div>
+        </div>
+
+        <!-- Tools -->
+        <div class="control-group">
+            <label>Narzędzia:</label>
+            <div class="tool-buttons">
+                <button id="coordinate-tool" class="tool-btn">Współrzędne</button>
+                <button id="measure-tool" class="tool-btn">Pomiar</button>
+                <button id="clear-all" class="tool-btn">Wyczyść</button>
+            </div>
+        </div>
+
+        <!-- Coordinate Export -->
+        <div class="control-group">
+            <label>Eksport współrzędnych:</label>
+            <div class="tool-buttons">
+                <button id="export-coordinates" class="tool-btn" disabled>Eksportuj TXT</button>
+                <button id="clear-coordinates" class="tool-btn" disabled>Wyczyść punkty</button>
+            </div>
+            <div id="coordinate-count" class="opacity-display">Punktów: 0</div>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Measurement Display -->
+    <div id="measurement-display" class="measurement-display"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Configuration for WMS viewer
+    window.wmsConfig = {
+        geoserverWorkspace: '{{ config.GEOSERVER_WORKSPACE or "default" }}'
+    };
+</script>
+<script src="{{ url_for('static', filename='wms-viewer.js') }}"></script>
+{% endblock %}

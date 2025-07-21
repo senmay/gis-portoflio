@@ -4,7 +4,7 @@ Jest to projekt portfolio prezentujący umiejętności z zakresu GIS, programowa
 
 ## Struktura Projektu
 
-- `geomapper`: Moduł do rysowania geometrii na mapie Leaflet i zapisywania ich w bazie PostGIS.
+
 - `geouploader`: Narzędzie do uploadu plików GeoTIFF i ich automatycznej publikacji jako warstwy WMS w GeoServerze.
 - `pianostore`: Prosty sklep internetowy do sprzedaży nut (plików PDF) z symulacją procesu płatności.
 
