@@ -622,6 +622,54 @@ class WMSLayerViewer {
         this.elements.layerSelect.innerHTML = '<option value="">Ładowanie warstw...</option>';
         await this.loadWMSLayers();
     }
+
+    /**
+     * Handle COG layer loading from URL
+     */
+    onLoadCOG() {
+        const url = this.elements.cogUrlInput.value;
+        if (!url) {
+            this.showToast('Proszę podać URL do pliku COG', true);
+            return;
+        }
+        this.loadCOGLayer(url);
+    }
+
+    /**
+     * Load and display a COG layer from a URL
+     */
+    async loadCOGLayer(url) {
+        this.showToast('Ładowanie warstwy COG...');
+        
+        // Remove any existing COG layer
+        if (this.currentCOGLayer) {
+            this.map.removeLayer(this.currentCOGLayer);
+            this.currentCOGLayer = null;
+        }
+
+        try {
+            const georaster = await parseGeoraster(url);
+            this.currentCOGLayer = new GeoRasterLayer({
+                georaster: georaster,
+                opacity: 1.0,
+                resolution: 256 // tile size
+            });
+            
+            this.currentCOGLayer.addTo(this.map);
+            this.map.fitBounds(this.currentCOGLayer.getBounds());
+            
+            this.showToast('Pomyślnie załadowano warstwę COG');
+            
+            // Reset WMS layer selection to avoid confusion
+            this.elements.layerSelect.value = "";
+            this.removeCurrentWMSLayer();
+            this.disableLayerControls();
+
+        } catch (error) {
+            console.error("Błąd podczas ładowania warstwy COG:", error);
+            this.showToast("Nie udało się załadować warstwy COG. Sprawdź URL i konsolę.", true);
+        }
+    }
 }
 
 // Initialize WMS viewer when DOM is loaded

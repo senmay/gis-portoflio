@@ -36,3 +36,5 @@ def publish_geotiff_directly(layer_name, filepath):
         raise Exception(error_message)
 
     logger.info(f"Pomyślnie wysłano plik i opublikowano warstwę '{layer_name}'.")
+
+

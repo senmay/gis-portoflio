@@ -16,8 +16,10 @@
         {% endwith %}
 
         <form action="{{ url_for('geouploader.upload_file') }}" method="post" enctype="multipart/form-data" class="uploader-form">
+            <input type="hidden" name="publish_target" value="geoserver">
+
             <div>
-                <label for="layer_name">Nazwa warstwy w GeoServerze:</label>
+                <label for="layer_name">Nazwa warstwy:</label>
                 <input type="text" id="layer_name" name="layer_name" value="{{ layer_name if layer_name else '' }}" required>
             </div>
             <div>

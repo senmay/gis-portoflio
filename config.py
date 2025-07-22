@@ -40,3 +40,11 @@ class Config:
     def init_app(app):
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+    # Konfiguracja AWS S3 dla COG
+    S3_KEY = os.environ.get('AWS_ACCESS_KEY_ID')
+    S3_SECRET = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    S3_BUCKET = os.environ.get('AWS_BUCKET_NAME')
+    S3_LOCATION = os.environ.get('AWS_REGION')
+    AWS_FOLDER = os.environ.get('AWS_FOLDER_NAME')
+    AWS_ENDPOINT = os.environ.get('AWS_ENDPOINT')
+

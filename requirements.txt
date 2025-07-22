@@ -8,3 +8,5 @@ Flask-Mail
 pyproj
 rasterio
 requests
+boto3
+rio-cogeo

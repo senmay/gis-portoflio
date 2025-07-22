@@ -10,6 +10,7 @@ from pyproj import Transformer
 import re
 import logging
 from logging.handlers import RotatingFileHandler
+import boto3
 
 from config import Config
 
@@ -240,6 +241,43 @@ def create_app(config_class=Config):
         except Exception as e:
             current_app.logger.error(f"Błąd podczas pobierania informacji o warstwie: {e}", exc_info=True)
             return jsonify({'error': 'Błąd serwera podczas pobierania informacji o warstwie'}), 500
+
+    @app.route('/s3-viewer')
+    def s3_viewer():
+        return render_template('s3_viewer.html')
+
+    @app.route('/api/s3/list')
+    def list_s3_objects():
+        try:
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id=current_app.config['S3_KEY'],
+                aws_secret_access_key=current_app.config['S3_SECRET'],
+                endpoint_url=current_app.config['AWS_ENDPOINT']
+            )
+            
+            bucket_name = current_app.config['S3_BUCKET']
+            prefix = current_app.config.get('AWS_FOLDER', '') # Użyj skonfigurowanego folderu
+            
+            response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+            
+            objects = []
+            if 'Contents' in response:
+                for obj in response['Contents']:
+                    # Pomiń folder główny, jeśli jest listowany
+                    if obj['Key'] == prefix:
+                        continue
+                    objects.append({
+                        'key': obj['Key'],
+                        'size': obj['Size'],
+                        'last_modified': obj['LastModified'].isoformat()
+                    })
+            
+            return jsonify(objects)
+            
+        except Exception as e:
+            current_app.logger.error(f"Błąd podczas listowania obiektów S3: {e}", exc_info=True)
+            return jsonify({'error': 'Błąd serwera podczas listowania obiektów S3'}), 500
 
     with app.app_context():
         db.create_all()

@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% block head %}
+{{ super() }}
+<!-- GeoRaster & Leaflet Plugin -->
+<script src="https://unpkg.com/georaster"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
+{% endblock %}
 {% block content %}
 <style>
     /* Fixed map container to prevent jumping */
@@ -178,6 +184,15 @@
                 <button id="clear-coordinates" class="tool-btn" disabled>Wyczyść punkty</button>
             </div>
             <div id="coordinate-count" class="opacity-display">Punktów: 0</div>
+        </div>
+    </div>
+
+    <!-- COG Viewer Controls -->
+    <div class="wms-controls">
+        <div class="control-group" style="grid-column: 1 / -1;">
+            <label for="cog-url-input">Wyświetl warstwę COG z URL:</label>
+            <input type="text" id="cog-url-input" placeholder="Wklej URL do pliku COG..." style="padding: 0.5rem; background-color: #2c2c2c; border: 1px solid #444; border-radius: 5px; color: var(--primary-text-color); font-size: 0.9rem;">
+            <button id="load-cog-btn" class="tool-btn" style="margin-top: 0.5rem;">Wyświetl COG</button>
         </div>
     </div>
 

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}COG Viewer | {{ layer_name }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<!-- GeoRaster & Leaflet Plugin -->
+<script src="https://unpkg.com/georaster"></script>
+<script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
+<style>
+    #map {
+        height: 70vh;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section id="cog-viewer">
+    <h2>Wyświetlanie warstwy COG: {{ layer_name }}</h2>
+
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div class="info-container">
+        <p>URL do pliku COG:</p>
+        <input type="text" value="{{ cog_url }}" readonly style="width: 100%; padding: 5px;">
+        <p class="notice">Ten link może być użyty w dowolnej aplikacji GIS obsługującej format Cloud-Optimized GeoTIFF.</p>
+    </div>
+
+    <div class="back-link">
+        <a href="{{ url_for('geouploader.index') }}" class="btn-secondary">Powrót do uploadera</a>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cogUrl = "{{ cog_url }}";
+    const bboxStr = "{{ bbox_epsg3857 }}";
+    
+    // Parse the bounding box
+    const bbox = bboxStr.split(',').map(Number);
+    const bounds = [[bbox[1], bbox[0]], [bbox[3], bbox[2]]];
+
+    // Initialize Leaflet map
+    const map = L.map('map').fitBounds(bounds);
+
+    // Add a base layer (e.g., OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Fetch and display the COG layer
+    parseGeoraster(cogUrl).then(georaster => {
+        const layer = new GeoRasterLayer({
+            georaster: georaster,
+            opacity: 0.7,
+            resolution: 256 // tile size
+        });
+        layer.addTo(map);
+        
+        // Fit map to the layer's extent
+        map.fitBounds(layer.getBounds());
+    }).catch(err => {
+        console.error("Błąd podczas ładowania warstwy COG:", err);
+        alert("Nie udało się załadować warstwy COG. Sprawdź konsolę przeglądarki, aby uzyskać więcej informacji.");
+    });
+});
+</script>
+{% endblock %}
