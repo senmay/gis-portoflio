@@ -10,7 +10,6 @@ from pyproj import Transformer
 import re
 import logging
 from logging.handlers import RotatingFileHandler
-import boto3
 
 from config import Config
 
