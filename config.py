@@ -8,8 +8,7 @@ class Config:
     """Przechowuje konfigurację aplikacji."""
     
     # Klucz do obsługi sesji i wiadomości flash
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'super_secret_key_for_flash_messages')
-    
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'super_secret_key_for_flash_messages') 
     
 
     # Konfiguracja dla wysyłki e-maili

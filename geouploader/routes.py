@@ -10,6 +10,8 @@ from pyproj import Transformer
 
 from . import geouploader_bp
 from .geoserver import publish_geotiff_directly
+from .validators import validate_file, validate_geotiff_and_get_bbox
+from .exceptions.custom_exceptions import ValidationError
 
 def get_geoserver_layers():
     config = current_app.config
@@ -85,57 +87,14 @@ def upload_file():
     original_filename_from_form = request.form.get('original_filename')
     file = request.files.get('file')
 
-    # Walidacja pliku
-    if file and file.filename != '':
-        # Sprawdzenie rozmiaru pliku
-        file.seek(0, os.SEEK_END)
-        file_length = file.tell()
-        file.seek(0)  # Wróć na początek pliku
-
-        if file_length > 100 * 1024 * 1024:  # 100 MB
-            flash("Błąd: Plik jest za duży. Maksymalny rozmiar to 100 MB.", "danger")
-            return redirect(url_for('.index'))
-
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(config['UPLOAD_FOLDER'], filename)
-        logger.info(f"Zapisywanie nowego pliku '{filename}' do '{filepath}'")
-        file.save(filepath)
-    elif original_filename_from_form:
-        filename = original_filename_from_form
-        filepath = os.path.join(config['UPLOAD_FOLDER'], filename)
-        if not os.path.exists(filepath):
-            flash("Błąd: Oryginalny plik nie został znaleziony.", "danger")
-            return redirect(url_for('.index'))
-    else:
-        flash("Błąd: Nazwa warstwy i plik są wymagane.", "danger")
+    try:
+        filename, filepath = validate_file(file, config, original_filename_from_form)
+    except ValidationError as e:
+        flash(str(e), "danger")
         return redirect(url_for('.index'))
 
     try:
-        # Walidacja CRS i przygotowanie pliku
-        with rasterio.open(filepath) as dataset:
-            source_crs = dataset.crs
-            source_bounds = dataset.bounds
-            
-            if not source_crs and not epsg_code_str:
-                flash("Błąd: Plik nie ma CRS. Proszę podać kod EPSG.", "warning")
-                return redirect(url_for('.index', show_epsg_input=True, layer_name=layer_name, filename=filename))
-            
-            if epsg_code_str:
-                try:
-                    source_crs = rasterio.crs.CRS.from_epsg(int(epsg_code_str))
-                except ValueError:
-                    flash("Błąd: Nieprawidłowy kod EPSG.", "danger")
-                    return redirect(url_for('.index', show_epsg_input=True, layer_name=layer_name, filename=filename))
-
-            if not source_crs:
-                 flash("Błąd: Nie udało się określić CRS.", "danger")
-                 return redirect(url_for('.index'))
-
-            # Transformacja BBOX do EPSG:3857 dla widoku mapy
-            transformer = Transformer.from_crs(source_crs, "EPSG:3857", always_xy=True)
-            minx_3857, miny_3857 = transformer.transform(source_bounds.left, source_bounds.bottom)
-            maxx_3857, maxy_3857 = transformer.transform(source_bounds.right, source_bounds.top)
-            bbox_epsg3857 = f"{minx_3857},{miny_3857},{maxx_3857},{maxy_3857}"
+        source_crs, bbox_epsg3857 = validate_geotiff_and_get_bbox(filepath, epsg_code_str)
 
         # Publikacja w GeoServerze
         logger.info(f"Cel: GeoServer. Publikowanie warstwy '{layer_name}'.")
@@ -143,9 +102,9 @@ def upload_file():
         flash(f"Sukces! Warstwa '{layer_name}' opublikowana w GeoServerze.", "success")
         return redirect(url_for('wms_viewer', layer_name=layer_name, bbox_epsg3857=bbox_epsg3857))
 
-    except rasterio.errors.RasterioIOError:
-        flash("Błąd: Nieprawidłowy format pliku. Oczekiwano GeoTIFF.", "danger")
-        return redirect(url_for('.index'))
+    except ValidationError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('.index', show_epsg_input=True, layer_name=layer_name, filename=filename))
     except Exception as e:
         flash(f"Wystąpił nieoczekiwany błąd: {e}", "danger")
         logger.error(f"Błąd w upload_file dla warstwy '{layer_name}'.", exc_info=True)
