@@ -5,9 +5,8 @@ OBJECT_NAME_TO_UPLOAD = 'RT_L1C_T33UVT_A039373_20240919T101018_B04.tif'
 
 s3_client = boto3.client(
     's3',
-    region_name='eu-central-1',
-    aws_access_key_id=config.get('S3_KEY', 'your_access_key_id'),
-    aws_secret_access_key=config.get('S3_SECRET', 'your_secret_access_key'),
+   region_name='eu-central-1',
+
 )
 
 # Generate the presigned URL for uploading the file
