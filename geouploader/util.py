@@ -6,12 +6,14 @@ OBJECT_NAME_TO_UPLOAD = 'RT_L1C_T33UVT_A039373_20240919T101018_B04.tif'
 s3_client = boto3.client(
     's3',
    region_name='eu-central-1',
-
-)
+#    aws_access_key_id=current_app.config['S3_KEY'],
+#    aws_secret_access_key=current_app.config['S3_SECRET']
+   )
 
 # Generate the presigned URL for uploading the file
 LocalPath = 'orto_ref_host/' + OBJECT_NAME_TO_UPLOAD
 ObjectName = OBJECT_NAME_TO_UPLOAD
+
 response = s3_client.generate_presigned_post(
     Bucket = 'viewwms',
     Key = 'cog/' + ObjectName,
