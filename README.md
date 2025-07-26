@@ -1,14 +1,28 @@
 # Portfolio GIS & Web
 
-Jest to projekt portfolio prezentujący umiejętności z zakresu GIS, programowania w Pythonie (Flask) oraz tworzenia aplikacji webowych.
+To jest projekt portfolio prezentujący umiejętności z zakresu GIS, programowania w Pythonie (Flask) oraz tworzenia aplikacji webowych. Główne komponenty to narzędzie do przesyłania plików GeoTIFF z funkcją publikacji WMS oraz przeglądarka WMS.
+
+## Jak to działa?
+
+Aplikacja oferuje dwa odrębne przepływy pracy do publikowania danych geoprzestrzennych:
+
+1.  **Bezpośrednio do GeoServera:**
+    *   Użytkownik przesyła plik GeoTIFF bezpośrednio przez interfejs webowy.
+    *   Backend, zbudowany przy użyciu Flaska, odbiera plik.
+    *   Plik jest następnie przesyłany do instancji GeoServera za pomocą GeoServer REST API, udostępniając go jako warstwę WMS.
+
+2.  **Cloud-Optimized GeoTIFF (COG) na AWS S3:**
+    *   Użytkownik przesyła plik GeoTIFF.
+    *   Backend konwertuje plik GeoTIFF na format Cloud-Optimized GeoTIFF (COG).
+    *   Plik COG jest przesyłany do bucketa Amazon S3.
+    *   W GeoServerze tworzona jest warstwa WMS, która odwołuje się do pliku COG na S3. To podejście jest bardziej skalowalne i wydajne dla dużych zbiorów danych.
 
 ## Struktura Projektu
 
-
-- `geouploader`: Narzędzie do uploadu plików GeoTIFF i ich automatycznej publikacji jako warstwy WMS w GeoServerze.
-- `pianostore`: Prosty sklep internetowy do sprzedaży nut (plików PDF) z symulacją procesu płatności.
-
----
+*   `geouploader`: Główny moduł do obsługi przesyłania plików, przetwarzania GeoTIFF i publikowania w GeoServerze.
+*   `wms-viewer`: Przeglądarka internetowa dla warstw WMS z GeoServera, z funkcjami takimi jak eksport współrzędnych i pomiary.
+*   `static`: Zawiera statyczne zasoby, takie jak CSS i JavaScript.
+*   `templates`: Zawiera szablony HTML aplikacji.
 
 ## Instalacja i Uruchomienie
 
@@ -33,41 +47,10 @@ Jest to projekt portfolio prezentujący umiejętności z zakresu GIS, programowa
     ```
 
 4.  **Skonfiguruj zmienne środowiskowe:**
-    - Skopiuj plik `.env.example` do `.env` (jeśli istnieje) lub utwórz nowy plik `.env`.
-    - Uzupełnij zmienne dla głównej aplikacji (PostgreSQL, GeoServer).
-    - **Dodaj konfigurację dla wysyłki e-maili (wymagane dla sklepu):**
-      ```
-      # Ustawienia serwera SMTP (np. dla Gmaila)
-      MAIL_SERVER=smtp.googlemail.com
-      MAIL_PORT=587
-      MAIL_USE_TLS=True
-      MAIL_USERNAME=twoj-adres@gmail.com
-      MAIL_PASSWORD=twoje-haslo-do-aplikacji # Ważne: użyj hasła aplikacji, nie hasła do konta!
-      MAIL_DEFAULT_SENDER="Nazwa Sklepu <twoj-adres@gmail.com>"
-      ```
+    *   Utwórz plik `.env`.
+    *   Uzupełnij niezbędne zmienne dla aplikacji (np. dane dostępowe do PostgreSQL, GeoServera).
 
 5.  **Uruchom aplikację:**
-    - Przed pierwszym uruchomieniem, utwórz bazę danych sklepu: `flask pianostore init-db`
-    - Uruchom serwer: `flask run`
-
----
-
-## Moduł Sklepu z Nutami (`pianostore`)
-
-Moduł ten jest w pełni funkcjonalnym prototypem sklepu, który symuluje proces zakupu.
-
-### Jak dodać nowe nuty?
-
-1.  Umieść plik z okładką (np. `nowa-okladka.png`) w folderze `pianostore/static/img/`.
-2.  Umieść plik PDF z nutami (np. `nowe-nuty.pdf`) w folderze `pianostore/static/pdf/`.
-3.  Użyj poniższej komendy w terminalu, aby dodać produkt do bazy danych (aplikacja zapyta Cię o wszystkie szczegóły):
     ```bash
-    flask pianostore add-product
+    flask run
     ```
-4.  Po ponownym uruchomieniu aplikacji, nowy produkt pojawi się w sklepie.
-
-### Jak działa "zakup"?
-
-1.  Użytkownik klika "Kup Teraz" i podaje swój adres e-mail.
-2.  Aplikacja symuluje pomyślną płatność, zapisuje zamówienie w lokalnej bazie danych SQLite (`pianostore.db`) i wysyła e-mail z unikalnym linkiem do pobrania.
-3.  Kliknięcie w link pozwala pobrać plik PDF. Link jest powiązany z konkretnym zamówieniem.

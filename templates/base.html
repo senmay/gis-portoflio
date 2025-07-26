@@ -29,6 +29,7 @@
                 <a href="{{ url_for('home') }}" class="{{ 'active' if request.endpoint == 'home' else '' }}">Home</a>
                 <a href="{{ url_for('projects') }}" class="{{ 'active' if request.endpoint == 'projects' else '' }}">Projekty</a>
                 <a href="{{ url_for('wms_viewer') }}" class="{{ 'active' if request.endpoint == 'wms_viewer' else '' }}">WMS Viewer</a>
+                <a href="http://geoai.mapiarz.pl/" class="">GEO-AI Assistant</a>
                 
                 
             </nav>
@@ -39,7 +40,11 @@
         </main>
 
         <footer>
-            <p>&copy; 2025. Wszelkie prawa zastrzeżone.</p>
+            <div class="contact-info">
+                <a href="mailto:dominik.szarzynski@gmail.com">dominik.szarzynski@gmail.com</a>
+                <a href="https://github.com/senmay" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/dszarzynski/" target="_blank">LinkedIn</a>
+            </div>
         </footer>
     </div>
 
