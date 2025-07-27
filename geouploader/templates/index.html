@@ -133,6 +133,8 @@
             <button type="submit">Wgraj i publikuj</button>
         </form>
         
+        <a href="{{ url_for('geouploader.upload_cog_route') }}" class="home-link">Upload COG to S3</a>
+        <a href="{{ url_for('geouploader.list_cogs') }}" class="home-link">View COGs from S3</a>
         <a href="{{ url_for('home') }}" class="home-link">Powrót do strony głównej</a>
     </div>
 </body>

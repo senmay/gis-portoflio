@@ -7,11 +7,13 @@ from flask import (render_template, request, flash, redirect, url_for,
 import tempfile
 import requests
 from pyproj import Transformer
+import json
 
 from . import geouploader_bp
 from .geoserver import publish_geotiff_directly
 from .validators import validate_file, validate_geotiff_and_get_bbox
 from .exceptions.custom_exceptions import ValidationError
+from .util import upload_cog_to_s3, list_cogs_in_bucket, get_cog_bbox
 
 def get_geoserver_layers():
     config = current_app.config
@@ -44,6 +46,37 @@ def index():
     layer_name = request.args.get('layer_name', '')
     filename = request.args.get('filename', '')
     return render_template('geouploader.html', show_epsg_input=show_epsg_input, layer_name=layer_name, filename=filename)
+
+@geouploader_bp.route('/upload_cog', methods=['GET', 'POST'])
+def upload_cog_route():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part', 'danger')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file', 'danger')
+            return redirect(request.url)
+        if file:
+            status_code = upload_cog_to_s3(file)
+            if status_code == 204:
+                flash('File uploaded successfully to S3.', 'success')
+            else:
+                flash(f'Failed to upload file to S3. Status code: {status_code}', 'danger')
+            return redirect(url_for('.index'))
+    return render_template('upload_cog.html')
+
+@geouploader_bp.route('/cog_viewer')
+def cog_viewer():
+    cog_url = request.args.get('url')
+    if not cog_url:
+        return "Please provide a 'url' query parameter.", 400
+    return render_template('cog_viewer.html', cog_url=cog_url)
+
+@geouploader_bp.route('/list_cogs')
+def list_cogs():
+    cogs = list_cogs_in_bucket()
+    return render_template('list_cogs.html', cogs=cogs)
 
 @geouploader_bp.route('/view_wms')
 def view_wms_layers():
@@ -86,6 +119,9 @@ def upload_file():
     epsg_code_str = request.form.get('epsg_code')
     original_filename_from_form = request.form.get('original_filename')
     file = request.files.get('file')
+
+    if publish_target == 'cog':
+        return redirect(url_for('.upload_cog_route'), code=307)
 
     try:
         filename, filepath = validate_file(file, config, original_filename_from_form)
@@ -130,3 +166,4 @@ def republish_cog():
         logger.error(f"Błąd podczas ponownej publikacji warstwy '{layer_name}'.", exc_info=True)
         flash(f"Błąd podczas ponownej publikacji: {e}", "danger")
         return redirect(url_for('.index'))
+
