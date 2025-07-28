@@ -1,14 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload COG to S3</title>
-</head>
-<body>
-    <h1>Upload COG to S3</h1>
-    <form method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
-    </form>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Upload COG to S3{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Upload Cloud-Optimized GeoTIFF to S3</h2>
+    <p class="text-muted">
+        Select a GeoTIFF file. The application will convert it to a Cloud-Optimized GeoTIFF (COG)
+        and upload it to the S3 bucket.
+    </p>
+
+    <!-- Form Container -->
+    <div id="upload-form-container">
+        <form id="upload-form" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">GeoTIFF File</label>
+                <input class="form-control" type="file" name="file" id="file" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-cloud-arrow-up-fill"></i> Upload and Convert
+            </button>
+        </form>
+    </div>
+
+    <!-- Loading Indicator (Initially Hidden) -->
+    <div id="loading-indicator" class="text-center mt-4" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2"><strong>Processing file...</strong></p>
+        <p class="text-muted">This may take a several seconds. Please do not close this window.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('upload-form');
+    const formContainer = document.getElementById('upload-form-container');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const fileInput = document.getElementById('file');
+
+    form.addEventListener('submit', function (event) {
+        // Prevent the default form submission
+        event.preventDefault();
+
+        // Check if a file is selected
+        if (!fileInput.files || fileInput.files.length === 0) {
+            // You can add a more user-friendly message here if you want
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        // Hide the form and show the loading indicator
+        formContainer.style.display = 'none';
+        loadingIndicator.style.display = 'block';
+
+        // Create FormData object to send the file
+        const formData = new FormData(form);
+
+        // Submit the form data using fetch
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            // When the server responds, reload the page.
+            // The server will have set a flash message (success or error).
+            window.location.reload();
+        })
+        .catch(error => {
+            // In case of a network error, also reload to see if the server is down
+            console.error('Error during upload:', error);
+            // Restore the form and hide the spinner
+            formContainer.style.display = 'block';
+            loadingIndicator.style.display = 'none';
+            // Optionally, display an error message to the user
+            alert('An unexpected error occurred. Please try again.');
+        });
+    });
+});
+</script>
+{% endblock %}
