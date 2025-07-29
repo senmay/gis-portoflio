@@ -5,11 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
 
 class Config:
-    """Przechowuje konfigurację aplikacji."""
-    
-    # Klucz do obsługi sesji i wiadomości flash
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'super_secret_key_for_flash_messages') 
-    
+    """Przechowuje konfigurację aplikacji."""    
 
     # Konfiguracja dla wysyłki e-maili
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
@@ -24,11 +20,6 @@ class Config:
     GEOSERVER_WORKSPACE = os.environ.get('GEOSERVER_WORKSPACE', "host_strona")
     GEOSERVER_USER = os.environ.get("GEOSERVER_USER", "admin")
     GEOSERVER_PASSWORD = os.environ.get("GEOSERVER_PASSWORD", "geoserver")
-
-    # Konfiguracja bazy danych PostGIS
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres:password@localhost:5432/gisdb'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Konfiguracja ścieżek
     # Używamy os.path.abspath, aby zapewnić, że ścieżka jest zawsze poprawna
