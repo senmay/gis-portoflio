@@ -7,6 +7,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 class Config:
     """Przechowuje konfigurację aplikacji."""    
 
+    
     # Konfiguracja dla wysyłki e-maili
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
@@ -29,6 +30,8 @@ class Config:
     @staticmethod
     def init_app(app):
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
 
     # Konfiguracja AWS S3 dla COG
     S3_KEY = os.environ.get('AWS_ACCESS_KEY_ID')
